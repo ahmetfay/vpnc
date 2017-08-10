@@ -1,0 +1,15 @@
+if [ "$(id -u)" -ne 0 ]; then
+	SELF=`echo $0 | sed -ne 's|^.*/||p'`
+	echo "$SELF must be run as root." 1>&2
+	echo "try: sudo $SELF" 1>&2
+	exit 1
+fi
+PLIST=/Library/LaunchDaemons/com.wolfereiter.vpnc.plist 
+CONF=`grep \.conf $PLIST | sed 's/<[^>]*>//g' | tr -d " \t"`
+GATEWAY=`grep gateway $CONF`
+ERROR=$( { /bin/launchctl load -w $PLIST; } 2>&1 )
+if [ -z "$ERROR" ]; then
+	echo "starting vpnc daemon connection to $GATEWAY."
+else
+	echo $ERROR
+fi
